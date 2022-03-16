@@ -6,14 +6,14 @@ from numpy import sin,cos,tan
 
 
 GLOBAL_STEP = 0.5
-GOAL_NUMBER = 60
+GOAL_NUMBER = 2
 
 NUMBER_OF_ITERATIONS = int(GOAL_NUMBER/GLOBAL_STEP)
 
 def euler_function(val):
     return np.exp(val) 
 
-def euler_ableitung(val):
+def euler_f(val):
     return val
 
 def log_function(val):
@@ -34,9 +34,9 @@ def tang_func(val):
 def tang_func_r(val):
     return 1 + pow(val,2)
 
-ziel_func = sin_func
+ziel_func = euler_function
 
-ableitung = cos_func
+ableitung = euler_f
 
 START_VALUE = ziel_func(0)
 

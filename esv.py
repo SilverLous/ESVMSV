@@ -1,5 +1,4 @@
 def euler_verfahren_r(step,val,func):
-    print(step,val,func(val))
     return val + step * func(val)
 
 def euler_verfahren(start_value, number_of_iterations, step,func ):
