@@ -6,7 +6,7 @@ from numpy import sin,cos,tan
 
 
 GLOBAL_STEP = 0.5
-GOAL_NUMBER = 2
+GOAL_NUMBER = 60
 
 NUMBER_OF_ITERATIONS = int(GOAL_NUMBER/GLOBAL_STEP)
 
@@ -34,9 +34,9 @@ def tang_func(val):
 def tang_func_r(val):
     return 1 + pow(val,2)
 
-ziel_func = euler_function
+ziel_func = sin_func
 
-ableitung = euler_ableitung
+ableitung = cos_func
 
 START_VALUE = ziel_func(0)
 
