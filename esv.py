@@ -1,4 +1,3 @@
-
 def euler_verfahren_r(step,val,func):
     return val + step * func(val)
 
