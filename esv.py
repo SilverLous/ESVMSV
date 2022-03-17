@@ -1,8 +1,19 @@
-def euler_verfahren_r(step,val,func):
+def Euler_verfahren_r(step,val,func):
     return val + step * func(val)
 
-def euler_verfahren(start_value, number_of_iterations, step,func ):
+def generelle_einschritt_verfahren(start_value, number_of_iterations, step,func, verfahren ):
     res_list = [start_value]
     for i in range(number_of_iterations):
-        res_list.append(euler_verfahren_r(step,res_list[i],func))
+        res_list.append(verfahren(step,res_list[i],func))
     return res_list
+
+def Heun_verfahren_r(step,val,func):
+    temp = Euler_verfahren_r(step,val,func)
+    #return 1/2 * (func(val) + func(temp) )
+    return val + 1/2 * step * (func(val) + func(temp))
+
+    return 1/2 * val + 1/2 * (temp + step * func(temp))
+
+def verbessertes_Euler_verfahren_r(step,val,func):
+    temp = val + step/2 * func(val)
+    return val + step * func(temp)
