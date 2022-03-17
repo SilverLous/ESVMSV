@@ -12,7 +12,7 @@ def Heun_verfahren_r(step,val,func):
     #return 1/2 * (func(val) + func(temp) )
     return val + 1/2 * step * (func(val) + func(temp))
 
-    return 1/2 * val + 1/2 * (temp + step * func(temp))
+    return 1/2 * val + 1/2 * (temp + step * func(tem))
 
 def verbessertes_Euler_verfahren_r(step,val,func):
     temp = val + step/2 * func(val)
