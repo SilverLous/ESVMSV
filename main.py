@@ -104,18 +104,18 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number):
     #plt.plot(x_array,isode_res,label="Magic")
     plt.show()
 
-def lotka_vol(func,abl,start,step,goal):
-    p_goal = goal
-    p_step = step
-    p_start_value = start
-    p_func = func
-    p_ableitung = abl
-    iter = int(goal/p_step) # Number of iterations
+def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
+    goal = p_goal
+    step = p_step
+    start = p_start
+    func = p_func
+    abl = p_abl
+    iter = int(goal/step) # Number of iterations
     x = np.linspace(0,goal,200)
     #plt.plot(x,ziel_func(x),label="Zielfunktion")
 
-    euler_res = esv.generelle_einschritt_verfahren(number_of_iterations=iter,start_value=p_start_value,step=p_step,func=p_ableitung, verfahren=esv.Euler_verfahren_r)
-    imp_euler_res = esv.generelle_einschritt_verfahren(number_of_iterations=iter,start_value=p_start_value,step=p_step,func=p_ableitung, verfahren=esv.verbessertes_Euler_verfahren_r)
+    euler_res = esv.generelle_einschritt_verfahren(number_of_iterations=iter,start_value=start,step=step,func=abl, verfahren=esv.Euler_verfahren_r)
+    imp_euler_res = esv.generelle_einschritt_verfahren(number_of_iterations=iter,start_value=start,step=step,func=abl, verfahren=esv.verbessertes_Euler_verfahren_r)
     plt.plot(np.linspace(0,goal,iter+1),np.array(euler_res).T[0],label="Euler Beute")
     plt.plot(np.linspace(0,goal,iter+1),np.array(euler_res).T[1],label="Euler Räuber")
     plt.plot(np.linspace(0,goal,iter+1),np.array(imp_euler_res).T[0],label="Verbessertes Euler Verfahren Beute")
