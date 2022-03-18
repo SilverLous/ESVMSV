@@ -3,22 +3,24 @@ import matplotlib.pyplot as plt
 import esv
 import msv
 from numpy import sin,cos,tan
+from scipy.integrate import odeint
+import pandas as pd
 
 
-GLOBAL_STEP = 0.5
-GOAL_NUMBER = 5
+step = 0.125
+goal = 1.5
 
 
-def euler_function(val):
+def euler_function(val,t=None):
     return np.exp(val) 
 
-def euler_f(val):
+def euler_f(val,t=None):
     return val
 
 def log_function(val):
     return np.log(val+1)
 
-def log_ableitung(val):
+def log_ableitung(val,t=None):
     return 1/(val+1)
 
 def sin_func(val):
@@ -30,7 +32,7 @@ def cos_func(val):
 def tang_func(val):
     return tan(val)
 
-def tang_func_r(val):
+def tang_func_r(val,t=None):
     return 1 + pow(val,2)
 
 def Lotka_Volterra_derivative(X, alpha, beta, delta, gamma):
@@ -42,28 +44,64 @@ def Lotka_Volterra_derivative(X, alpha, beta, delta, gamma):
 def Lotka_temp(val):
     return Lotka_Volterra_derivative(val,1,1,1,1)
 
-ziel_func = euler_function
+ziel_func = tang_func
 
-ableitung = euler_f
+ableitung = tang_func_r
 
 START_VALUE = ziel_func(0) # ziel_func(0)
 
-def normal():
-    iter = int(GOAL_NUMBER/GLOBAL_STEP) # Number of iterations
-    x = np.linspace(0,GOAL_NUMBER,200)
-    plt.plot(x,ziel_func(x),label="Zielfunktion")
+def normal(p_ziel_func,p_GDL,p_step,p_goal_number):
+    n_ziel_func = p_ziel_func
+    Gdl = p_GDL
+    step = p_step
+    goal = p_goal_number
+    start = n_ziel_func(0)
+    einschritt_verfahren = [esv.Euler_verfahren_r,esv.verbessertes_Euler_verfahren_r,esv.Heun_verfahren_r]
+    mehrschritt_verfahren = [msv.zwei_schritt_Adams_Bashforth_verfahren_r]
+    num_verfahren = len(einschritt_verfahren)+len(mehrschritt_verfahren)
+    sqrt_of_l = round((num_verfahren+1) ** 0.5 + 0.5)
+    fig = plt.figure(figsize=(12, 12))
+    index = 1
+    iter = int(goal/step) # Number of iterations
+    x = np.linspace(0,goal,200)
+    x_array = np.linspace(0,goal,iter+1,endpoint=True)
 
-    euler_res = esv.generelle_einschritt_verfahren(      number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung, verfahren=esv.Euler_verfahren_r)
-    imp_euler_res = esv.generelle_einschritt_verfahren(  number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung, verfahren=esv.verbessertes_Euler_verfahren_r)
-    heun_res = esv.generelle_einschritt_verfahren(       number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung, verfahren=esv.Heun_verfahren_r)
-    msv_res = msv.zwei_schritt_Adams_Bashforth_verfahren(number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung)
-    plt.plot(np.linspace(0,GOAL_NUMBER,iter+1),euler_res,label="Euler")
-    plt.plot(np.linspace(0,GOAL_NUMBER,iter+1),heun_res,label="Heun Verfahren")
-    plt.plot(np.linspace(0,GOAL_NUMBER,iter+1),imp_euler_res,label="Verbessertes Euler Verfahren")
-    plt.plot(np.linspace(0,GOAL_NUMBER,iter+1),msv_res,label="Zwei-Schritt Adams-Bashforth verfahren")
-    
+    for verfahren in einschritt_verfahren:
+        verfahren_name = str(verfahren)
+        verfahren_name = verfahren_name[10:verfahren_name.find("at 0")]
+        fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+        plt.plot(x,n_ziel_func(x),label="Zielfunktion")
+        plt.plot(x_array,esv.generelle_einschritt_verfahren(start,iter,step,Gdl,verfahren),label=verfahren_name)
+        plt.legend()
+        plt.grid()
+        index+=1
+        
+    for verfahren in mehrschritt_verfahren:
+        verfahren_name = str(verfahren)
+        verfahren_name = verfahren_name[10:verfahren_name.find("at 0")]
+        fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+        plt.plot(x,n_ziel_func(x),label="Zielfunktion")
+        plt.plot(x_array,msv.generelle_mehrschritt_verfahren(start,iter,step,Gdl,verfahren),label=verfahren_name)
+        plt.legend()
+        plt.grid()
+        index+=1
+    fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+    plt.plot(x,n_ziel_func(x),label="Zielfunktion")
+    plt.plot(x_array,odeint(Gdl,start,x_array),label="Isode")
     plt.legend()
     plt.grid()
+    #euler_res = esv.generelle_einschritt_verfahren(      number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung, verfahren=esv.Euler_verfahren_r)
+    #imp_euler_res = esv.generelle_einschritt_verfahren(  number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung, verfahren=esv.verbessertes_Euler_verfahren_r)
+    #heun_res = esv.generelle_einschritt_verfahren(       number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung, verfahren=esv.Heun_verfahren_r)
+
+    #msv_res = msv.zwei_schritt_Adams_Bashforth_verfahren(number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung)
+    #plt.plot(x_array,euler_res,label="Euler")
+    #plt.plot(x_array,heun_res,label="Heun Verfahren")
+    #plt.plot(x_array,imp_euler_res,label="Verbessertes Euler Verfahren")
+    #plt.plot(x_array,msv_res,label="Zwei-Schritt Adams-Bashforth verfahren")
+
+    #isode_res = odeint(ableitung,START_VALUE,x_array)
+    #plt.plot(x_array,isode_res,label="Magic")
     plt.show()
 
 def lotka_vol(func,abl,start,step,goal):
@@ -88,5 +126,7 @@ def lotka_vol(func,abl,start,step,goal):
     plt.show()
 
 if __name__ == "__main__":
-    normal()
-    lotka_vol(func=None,abl=Lotka_temp,start=[4,2],step=0.125,goal = 20)
+    normal(euler_function,euler_f    ,0.125,15)
+    normal(tang_func,tang_func_r     ,0.125,1.5)
+    normal(log_function,log_ableitung,0.125,15)
+    #lotka_vol(func=None,abl=Lotka_temp,start=[4,2],step=0.125,goal = 20)
