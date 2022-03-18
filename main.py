@@ -90,18 +90,6 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number):
     plt.plot(x_array,odeint(Gdl,start,x_array),label="Isode")
     plt.legend()
     plt.grid()
-    #euler_res = esv.generelle_einschritt_verfahren(      number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung, verfahren=esv.Euler_verfahren_r)
-    #imp_euler_res = esv.generelle_einschritt_verfahren(  number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung, verfahren=esv.verbessertes_Euler_verfahren_r)
-    #heun_res = esv.generelle_einschritt_verfahren(       number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung, verfahren=esv.Heun_verfahren_r)
-
-    #msv_res = msv.zwei_schritt_Adams_Bashforth_verfahren(number_of_iterations=iter,start_value=START_VALUE,step=GLOBAL_STEP,func=ableitung)
-    #plt.plot(x_array,euler_res,label="Euler")
-    #plt.plot(x_array,heun_res,label="Heun Verfahren")
-    #plt.plot(x_array,imp_euler_res,label="Verbessertes Euler Verfahren")
-    #plt.plot(x_array,msv_res,label="Zwei-Schritt Adams-Bashforth verfahren")
-
-    #isode_res = odeint(ableitung,START_VALUE,x_array)
-    #plt.plot(x_array,isode_res,label="Magic")
     plt.show()
 
 def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
