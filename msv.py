@@ -30,9 +30,9 @@ def generelle_mehrschritt_verfahren(start_value,number_of_iterations,step,func,v
         #print(res_list)
     return res_list
 
-def backward_differentiation_verfahren(step,values,func,number_of_iterations,var):
-     if len(values)>1:
-         return 4/3 * values[0] - 1/3 * values[1] + 2/3*step*func(values[1])
+# def backward_differentiation_verfahren(step,values,func,number_of_iterations,var):
+#      if len(values)>1:
+#          return 4/3 * values[0] - 1/3 * values[1] + 2/3*step*func(values[1])
 
 def generell_Adams_Bashforth_Verfahren(step,values,func,number_of_iterations,var):
     iter = str(var)
@@ -49,4 +49,10 @@ def generate_starting_values(curr_list,iter,step,func):
     if len(curr_list) == iter:
         return curr_list
     return generate_starting_values(curr_list,iter,step,func)
+
+
+
+
+def mittelpunkt_verfahren(step,values,func,number_of_iterations,var):
+    return values[1] + 2 * step*func(values[0])
 

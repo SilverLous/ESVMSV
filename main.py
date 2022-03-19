@@ -19,13 +19,16 @@ def reversed_args(f):
     return g
 
 def euler_function(val,t=None):
-    return np.exp(val) 
+    return np.exp(val*2) 
 
 def euler_f(val,t=None):
-    return val
+    return val * 2
 
-def euler_f_temp(t,val):
-    return val
+def n_euler_function(val,t=None):
+    return -1 * np.exp(-val)
+
+def n_euler_f(val,t=None):
+    return -val
 
 def log_function(val):
     return np.log(val+1)
@@ -36,8 +39,14 @@ def log_ableitung(val,t=None):
 def sin_func(val):
     return sin(val)
 
-def cos_func(val):
+def cos_func(val,t=None):
     return cos(val)
+
+def banalt(val):
+    return (val**2)+1
+
+def banal_abl(val,t=None):
+    return val**(2/3)
 
 def tang_func(val):
     return tan(val)
@@ -51,7 +60,7 @@ def Lotka_Volterra_derivative(X, alpha, beta, delta, gamma):
     doty = y * (-delta + gamma * x) # growth - mortality (or other)
     return np.array([dotx, doty])
 
-def Lotka_temp(val):
+def Lotka_temp(val,t=None):
     return Lotka_Volterra_derivative(val,1,1,1,1)
 
 def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var):
@@ -61,12 +70,13 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var):
     step = p_step
     goal = p_goal_number
     start = n_ziel_func(0)
+    #start = 0
     einschritt_verfahren = [esv.Euler_verfahren,esv.verbessertes_Euler_verfahren,esv.Heun_verfahren]
-    mehrschritt_verfahren = [msv.zwei_schritt_Adams_Bashforth_verfahren,msv.backward_differentiation_verfahren,msv.generell_Adams_Bashforth_Verfahren]
+    mehrschritt_verfahren = [msv.zwei_schritt_Adams_Bashforth_verfahren,msv.generell_Adams_Bashforth_Verfahren,msv.mittelpunkt_verfahren]
     scipy_verfahren = [inte.BDF,inte.LSODA,inte.Radau,inte.RK23,inte.RK45,inte.DOP853]
     num_verfahren = len(einschritt_verfahren)+len(mehrschritt_verfahren)+len(scipy_verfahren)
     sqrt_of_l = round((num_verfahren+2) ** 0.5 + 0.5)
-    fig = plt.figure(figsize=(12, 12))
+    fig = plt.figure(figsize=(20, 20))
     index = 1
     iter = int(goal/step) # Number of iterations
     x = np.linspace(0,goal,200)
@@ -85,7 +95,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var):
         for i,value in enumerate(esv_res_list):
             diff_list.append(n_ziel_func(x_array[i])-value)
         plt.plot(x_array,diff_list,label="Differenz")
-        plt.title(verfahren_name)
+        plt.title("\n"+verfahren_name)
         fig.suptitle(ziel_func_name)
         plt.legend()
         plt.grid()
@@ -123,7 +133,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var):
     plt.legend()
     plt.grid()
     index+=1
-
+    """
     for verfahren in scipy_verfahren:
         verfahren_name = str(verfahren)
         verfahren_name = verfahren_name[29:verfahren_name.find("at 0")]
@@ -146,15 +156,17 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var):
         plt.legend()
         plt.grid()
         index+=1
-
+    """
 
     fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
     for key in alle_verfahren.keys():
         plt.plot(x_array,alle_verfahren[key],label=key[0])
+    #plt.subplots_adjust(hspace=1)
     plt.legend(fontsize=8,)
     plt.grid()
     plt.title("Differenzen zur Zielfunktion")
     plt.savefig("output.png", bbox_inches="tight")
+    plt.tight_layout(h_pad=2)
     plt.show()
 
 def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
@@ -165,21 +177,28 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
     abl = p_abl
     iter = int(goal/step) # Number of iterations
     x = np.linspace(0,goal,200)
+    x_array = np.linspace(0,goal,iter+1,endpoint=True)
     #plt.plot(x,ziel_func(x),label="Zielfunktion")
 
     euler_res = esv.generelle_einschritt_verfahren(number_of_iterations=iter,start_value=start,step=step,func=abl, verfahren=esv.Euler_verfahren)
     imp_euler_res = esv.generelle_einschritt_verfahren(number_of_iterations=iter,start_value=start,step=step,func=abl, verfahren=esv.verbessertes_Euler_verfahren)
     plt.plot(np.linspace(0,goal,iter+1),np.array(euler_res).T[0],label="Euler Beute")
     plt.plot(np.linspace(0,goal,iter+1),np.array(euler_res).T[1],label="Euler Räuber")
-    plt.plot(np.linspace(0,goal,iter+1),np.array(imp_euler_res).T[0],label="Verbessertes Euler Verfahren Beute")
-    plt.plot(np.linspace(0,goal,iter+1),np.array(imp_euler_res).T[1],label="Verbessertes Euler Verfahren Räuber")
+    plt.plot(np.linspace(0,goal,iter+1),np.array(imp_euler_res).T[0],label="Verb. Euler Verfahren Beute")
+    plt.plot(np.linspace(0,goal,iter+1),np.array(imp_euler_res).T[1],label="Verb. Euler Verfahren Räuber")
+    isode_res_list = odeint(abl,start,x_array)
+    plt.plot(np.linspace(0,goal,iter+1),np.array(isode_res_list).T[0],label="Lsoda Verfahren Beute")
+    plt.plot(np.linspace(0,goal,iter+1),np.array(isode_res_list).T[1],label="Lsoda Verfahren Räuber")
     
-    plt.legend()
+    plt.legend(fontsize=8,loc="upper right")
     plt.grid()
     plt.show()
 
 if __name__ == "__main__":
-    normal(euler_function,euler_f    ,0.125,2,5)
-    normal(tang_func,tang_func_r     ,0.125,1.5,5)
-    normal(log_function,log_ableitung,0.125,15,5)
-    #lotka_vol(func=None,abl=Lotka_temp,start=[4,2],step=0.125,goal = 20)
+    normal(euler_function,euler_f    ,0.125,2,  5)
+    normal(n_euler_function,n_euler_f    ,0.125,2,  5)
+    #normal(tang_func,tang_func_r     ,0.125,1.5,5)
+    #normal(log_function,log_ableitung,0.125,15, 5)
+    #normal(sin_func,cos_func,0.125,15, 5)
+    #normal(banalt,banal_abl,0.125,15, 5)
+    #lotka_vol(p_func=None,p_abl=Lotka_temp,p_start=[4,2],p_step=0.125,p_goal = 20)
