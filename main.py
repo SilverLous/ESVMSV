@@ -54,7 +54,7 @@ def Lotka_Volterra_derivative(X, alpha, beta, delta, gamma):
 def Lotka_temp(val):
     return Lotka_Volterra_derivative(val,1,1,1,1)
 
-def normal(p_ziel_func,p_GDL,p_step,p_goal_number):
+def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var):
     alle_verfahren = {}
     n_ziel_func = p_ziel_func
     Gdl = p_GDL
@@ -99,7 +99,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number):
         ziel_func_name =  ziel_func_name[10:ziel_func_name.find("at 0")]
         fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
         plt.plot(x,n_ziel_func(x),label="Zielfunktion")
-        msv_res_list = msv.generelle_mehrschritt_verfahren(start,iter,step,Gdl,verfahren)
+        msv_res_list = msv.generelle_mehrschritt_verfahren(start,iter,step,Gdl,verfahren,var)
         plt.plot(x_array,msv_res_list,label=verfahren_name)
         diff_list = []
         for i,value in enumerate(esv_res_list):
@@ -179,7 +179,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
     plt.show()
 
 if __name__ == "__main__":
-    normal(euler_function,euler_f    ,0.125,2)
-    normal(tang_func,tang_func_r     ,0.125,1.5)
-    normal(log_function,log_ableitung,0.125,15)
+    normal(euler_function,euler_f    ,0.125,2,5)
+    normal(tang_func,tang_func_r     ,0.125,1.5,5)
+    normal(log_function,log_ableitung,0.125,15,5)
     #lotka_vol(func=None,abl=Lotka_temp,start=[4,2],step=0.125,goal = 20)
