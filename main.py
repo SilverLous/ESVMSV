@@ -62,8 +62,8 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number):
     goal = p_goal_number
     start = n_ziel_func(0)
     einschritt_verfahren = [esv.Euler_verfahren,esv.verbessertes_Euler_verfahren,esv.Heun_verfahren]
-    mehrschritt_verfahren = [msv.zwei_schritt_Adams_Bashforth_verfahren,msv.backward_differentiation_verfahren]
-    scipy_verfahren = [inte.BDF,inte.LSODA,inte.Radau,inte.RK23,inte.RK45]
+    mehrschritt_verfahren = [msv.zwei_schritt_Adams_Bashforth_verfahren,msv.backward_differentiation_verfahren,msv.generell_Adams_Bashforth_Verfahren]
+    scipy_verfahren = [inte.BDF,inte.LSODA,inte.Radau,inte.RK23,inte.RK45,inte.DOP853]
     num_verfahren = len(einschritt_verfahren)+len(mehrschritt_verfahren)+len(scipy_verfahren)
     sqrt_of_l = round((num_verfahren+2) ** 0.5 + 0.5)
     fig = plt.figure(figsize=(12, 12))
@@ -115,28 +115,32 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number):
     diff_list = []
     plt.plot(x,n_ziel_func(x),label="Zielfunktion")
     isode_res_list = odeint(Gdl,start,x_array)
-    plt.plot(x_array,isode_res_list,label="Isode")
+    plt.plot(x_array,isode_res_list,label="lsoda")
     for i,value in enumerate(isode_res_list):
         diff_list.append(n_ziel_func(x_array[i])-value)
-    alle_verfahren["Isode"] = diff_list
+    alle_verfahren["lsoda"] = diff_list
+    plt.plot(x_array,diff_list,label="Differenz")
     plt.legend()
     plt.grid()
     index+=1
 
     for verfahren in scipy_verfahren:
         verfahren_name = str(verfahren)
-        verfahren_name = verfahren_name[26:verfahren_name.find("at 0")]
+        verfahren_name = verfahren_name[29:verfahren_name.find("at 0")]
         fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
         diff_list = []
         plt.plot(x,n_ziel_func(x),label="Zielfunktion")
         start_arr = [start]
         start_arr.append(esv.Euler_verfahren(step,start,Gdl))
-        BDF_res = verfahren(reversed_args(Gdl),0,start_arr,goal,max_step=step)
-        for i in range(len(x_array)):
-            BDF_res.step()
-        BDF_res_list = BDF_res.dense_output().__call__(x_array)[1]
-        plt.plot(x_array,BDF_res_list,label=verfahren_name)
-        for i,value in enumerate(BDF_res_list):
+        scipy_res = verfahren(reversed_args(Gdl),0,start_arr,goal,max_step=step)
+        for i in range(len(x_array)-1):
+            scipy_res.step()
+        scipy_res_list = scipy_res.dense_output().__call__(x_array)[0]
+        #plt.plot(x_array,BDF_res_list,label=verfahren_name)
+        scipy_res_list2 = scipy_res.dense_output().__call__(x_array)[1]
+        #plt.plot(x_array,BDF_res_list2,label=verfahren_name)
+        plt.fill_between(x_array,scipy_res_list,scipy_res_list2,color="r",alpha=0.5,label=verfahren_name)
+        for i,value in enumerate(scipy_res_list):
             diff_list.append(n_ziel_func(x_array[i])-value)
         alle_verfahren[verfahren_name] = diff_list
         plt.legend()
@@ -146,12 +150,11 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number):
 
     fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
     for key in alle_verfahren.keys():
-        print(key,alle_verfahren[key])
-        plt.plot(x_array,alle_verfahren[key],label=key)
-    plt.legend(fontsize=8)
+        plt.plot(x_array,alle_verfahren[key],label=key[0])
+    plt.legend(fontsize=8,)
     plt.grid()
     plt.title("Differenzen zur Zielfunktion")
-
+    plt.savefig("output.png", bbox_inches="tight")
     plt.show()
 
 def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
