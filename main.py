@@ -18,40 +18,40 @@ def reversed_args(f):
         return f(*args[::-1])
     return g
 
-def euler_function(val,t=None):
-    return np.exp(val*2) 
+def euler_function(x, t=None):
+    return np.exp(x)
 
-def euler_f(val,t=None):
-    return val * 2
+def euler_f_ableitung(x, val, t=None):
+    return val
 
-def n_euler_function(val,t=None):
-    return -1 * np.exp(-val)
+def n_euler_function(x,t=None):
+    return -1 * np.exp(-x)
 
-def n_euler_f(val,t=None):
+def n_euler_f_ableitung(x, val, t=None):
     return -val
 
-def log_function(val):
-    return np.log(val+1)
+def log_function(x):
+    return np.log(x+1)
 
-def log_ableitung(val,t=None):
-    return 1/(val+1)
+def log_ableitung(x,val,t=None):
+    return 1/(x+1)
 
-def sin_func(val):
-    return sin(val)
+def sin_func(x,val=None):
+    return sin(x)
 
-def cos_func(val,t=None):
-    return cos(val)
+def cos_func(x,val=None,t=None):
+    return cos(x)
 
-def banalt(val):
-    return (val**2)+1
+def banalt(x,val=None):
+    return x**2
 
-def banal_abl(val,t=None):
-    return val**(2/3)
+def banal_abl(x,val,t=None):
+    return 2*x
 
-def tang_func(val):
-    return tan(val)
+def tang_func(x,val=None):
+    return tan(x)
 
-def tang_func_r(val,t=None):
+def tang_func_ableitung(x, val, t=None):
     return 1 + pow(val,2)
 
 def Lotka_Volterra_derivative(X, alpha, beta, delta, gamma):
@@ -120,7 +120,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
             verfahren_name = str(verfahren)
             verfahren_name = verfahren_name[10:verfahren_name.find("at 0")-1]
             fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-            esv_res_list = esv.generelle_einschritt_verfahren(start,iter,step,Gdl,verfahren)
+            esv_res_list = esv.generelle_einschritt_verfahren(start, x_array, iter, step, Gdl, verfahren)
             plot_ziel_func(x,ziel_func)
             plt.plot(x_array,esv_res_list,"--",label=verfahren_name,c="r")
             diff_list = []
@@ -138,7 +138,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
             if verfahren_name=="generell_Adams_Bashforth_Verfahren":
                 for stufen in range(2,6):
                     fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-                    msv_res_list = msv.generelle_mehrschritt_verfahren(start,iter,step,Gdl,verfahren,stufen)
+                    msv_res_list = msv.generelle_mehrschritt_verfahren(start, x_array, iter, step, Gdl, verfahren, stufen)
                     plot_ziel_func(x,ziel_func)
                     plt.plot(x_array,msv_res_list,"--",label=f"{stufen} Schritt AB Verfahren",c="r")
                     diff_list = []
@@ -151,7 +151,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
                     alle_verfahren[f"{stufen} Schritt AB Verfahren"] = diff_list
             else:
                 fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-                msv_res_list = msv.generelle_mehrschritt_verfahren(start,iter,step,Gdl,verfahren,2)
+                msv_res_list = msv.generelle_mehrschritt_verfahren(start, x_array, iter, step, Gdl, verfahren, 2)
                 plot_ziel_func(x,ziel_func)
                 plt.plot(x_array,msv_res_list,"--",label=verfahren_name,c="r")
                 diff_list = []
@@ -168,7 +168,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
         isode_res_list = odeint(Gdl,start,x_array)
         
         plot_ziel_func(x,ziel_func)
-        plt.plot(x_array,isode_res_list,"--",label="lsoda Räuber",c="r")
+        plt.plot(x_array,isode_res_list,"--",label="lsoda",c="r") #"lsoda Räuber"
         for i,value in enumerate(isode_res_list):
             diff_list.append(ziel_func_arr[i]-value[0])
         alle_verfahren["lsoda"] = diff_list
@@ -177,28 +177,28 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
         plot_details("lsoda",y_ticks,c_zoom)
         index+=1
     
-    if scipy_ver_erlaubt:
-        for verfahren in scipy_verfahren:
-            verfahren_name = str(verfahren)
-            verfahren_name = verfahren_name[29:verfahren_name.find("at 0")]
-            fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-            diff_list = []
-            plot_ziel_func(x,ziel_func)
-            start_arr = [start]
-            start_arr.append(esv.Euler_verfahren(step,start,Gdl))
-            scipy_res = verfahren(reversed_args(Gdl),0,start_arr,goal,max_step=step)
-            for i in range(len(x_array)-1):
-                scipy_res.step()
-            scipy_res_list = scipy_res.dense_output().__call__(x_array)[0]
-            #plt.plot(x_array,BDF_res_list,label=verfahren_name)
-            scipy_res_list2 = scipy_res.dense_output().__call__(x_array)[1]
-            #plt.plot(x_array,BDF_res_list2,label=verfahren_name)
-            plt.fill_between(x_array,scipy_res_list,scipy_res_list2,color="r",alpha=0.5,label=verfahren_name)
-            #for i,value in enumerate(scipy_res_list):
-            #    diff_list.append(n_ziel_func(x_array[i])-value)
-            #alle_verfahren[verfahren_name] = diff_list
-            plot_details(verfahren_name,y_ticks,c_zoom)
-            index+=1
+    #if scipy_ver_erlaubt:
+    #    for verfahren in scipy_verfahren:
+    #        verfahren_name = str(verfahren)
+    #        verfahren_name = verfahren_name[29:verfahren_name.find("at 0")]
+    #        fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+    #        diff_list = []
+    #        plot_ziel_func(x,ziel_func)
+    #        start_arr = [start]
+    #        start_arr.append(esv.Euler_verfahren(step,x_array[0],start,Gdl))
+    #        scipy_res = verfahren(reversed_args(Gdl),0,start_arr,goal,max_step=step)
+    #        for i in range(len(x_array)-1):
+    #            scipy_res.step()
+    #        scipy_res_list = scipy_res.dense_output().__call__(x_array)[0]
+    #        #plt.plot(x_array,BDF_res_list,label=verfahren_name)
+    #        scipy_res_list2 = scipy_res.dense_output().__call__(x_array)[1]
+    #        #plt.plot(x_array,BDF_res_list2,label=verfahren_name)
+    #        plt.fill_between(x_array,scipy_res_list,scipy_res_list2,color="r",alpha=0.5,label=verfahren_name)
+    #        #for i,value in enumerate(scipy_res_list):
+    #        #    diff_list.append(n_ziel_func(x_array[i])-value)
+    #        #alle_verfahren[verfahren_name] = diff_list
+    #        plot_details(verfahren_name,y_ticks,c_zoom)
+    #        index+=1
     
 
     fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
@@ -258,7 +258,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
         verfahren_name = str(verfahren)
         verfahren_name = verfahren_name[10:verfahren_name.find("at 0")-1]
         fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-        esv_res_list = esv.generelle_einschritt_verfahren(start,iter,step,Gdl,verfahren)
+        esv_res_list = esv.generelle_einschritt_verfahren(start, x_array, iter, step, Gdl, verfahren)
         plot_ziel_func(x_array,ziel_func_arr)
         plot_ziel_func(x_array,ziel_func[1],"b")
         plt.plot(x_array,np.array(esv_res_list).T[0],"--",label=verfahren_name+" Räuber",c="r")
@@ -273,7 +273,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
         if verfahren_name=="generell_Adams_Bashforth_Verfahren":
             for stufen in range(2,6):
                 fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-                msv_res_list = msv.generelle_mehrschritt_verfahren(start,iter,step,Gdl,verfahren,stufen)
+                msv_res_list = msv.generelle_mehrschritt_verfahren(start,x_array, iter, step, Gdl, verfahren, stufen)
                 plot_ziel_func(x_array,ziel_func_arr)
                 plot_ziel_func(x_array,ziel_func[1],"b")
                 plt.plot(x_array,np.array(msv_res_list).T[0],"--",label=f"{stufen} Schritt AB Verfahren Räuber",c="r")
@@ -284,7 +284,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
         else:
             fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
             print(verfahren_name,start)
-            msv_res_list = msv.generelle_mehrschritt_verfahren(start,iter,step,Gdl,verfahren,2)
+            msv_res_list = msv.generelle_mehrschritt_verfahren(start, x_array, iter, step, Gdl, verfahren, 2)
             plot_ziel_func(x_array,ziel_func_arr)                    
             plot_ziel_func(x_array,ziel_func[1],"b")
             plt.plot(x_array,np.array(msv_res_list).T[0],"--",label=verfahren_name+" Räuber",c="r")
@@ -312,8 +312,8 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
 
 
 if __name__ == "__main__":
-    x_array,euler_with_errors = normal(euler_function,euler_f    ,0.125,2,  5,1.01)
-    _,euler_without_errors = normal(euler_function,euler_f    ,0.125,2,  5)
+    x_array,euler_with_errors = normal(euler_function, euler_f_ableitung, 0.125, 2, 5, 1.01)
+    _,euler_without_errors = normal(euler_function, euler_f_ableitung, 0.125, 2, 5)
     for i,key in enumerate(euler_with_errors.keys()):
         diff_list = []
         for value1,value2 in zip(euler_with_errors[key],euler_without_errors[key]):
@@ -322,9 +322,9 @@ if __name__ == "__main__":
     plt.legend()
     plot_details("Differenzen zur Zielfunktion")
     plt.show()
-    #normal(n_euler_function,n_euler_f    ,0.125,2,  5)
-    #normal(tang_func,tang_func_r     ,0.125,1.5,5)
-    #normal(log_function,log_ableitung,0.125,15, 5)
-    #normal(sin_func,cos_func,0.125,15, 5)
-    #normal(banalt,banal_abl,0.125,15, 5)
+    normal(n_euler_function,n_euler_f_ableitung    ,0.125,2,  5)
+    normal(tang_func,tang_func_ableitung     ,0.125,1.5,5)
+    normal(log_function,log_ableitung,0.125,15, 5)
+    normal(sin_func,cos_func,0.125,15, 5)
+    normal(banalt,banal_abl,0.125,15, 5)
     #lotka_vol(p_func=None,p_abl=Lotka_temp,p_start=[4,2],p_step=0.125,p_goal = 20)
