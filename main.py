@@ -60,7 +60,10 @@ def Lotka_Volterra_derivative(X, alpha, beta, delta, gamma):
     doty = y * (-delta + gamma * x) # growth - mortality (or other)
     return np.array([dotx, doty])
 
-def Lotka_temp(val,t=None):
+def Lotka_temp(x,val,t=None):
+    return Lotka_Volterra_derivative(val,1,1,1,1)
+
+def Lsoda_Lotka_temp(val,t=None):
     return Lotka_Volterra_derivative(val,1,1,1,1)
 
 def plot_details(title,y_ticks=None,zoom=None):
@@ -81,14 +84,20 @@ def plot_ziel_func(x_arr,zielfunc,custom_color="lightskyblue"):
 
 def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
     cm = plt.get_cmap('gist_rainbow')
-    scipy_ver_erlaubt = True
-    normale_ver_erlaubt = True
     alle_verfahren = {}
     n_ziel_func = p_ziel_func
     Gdl = p_GDL
     step = p_step
     goal = p_goal_number
     start = n_ziel_func(0)
+    ziel_func_name =  str(n_ziel_func)
+    ziel_func_name =  ziel_func_name[10:ziel_func_name.find("at 0")-1]
+
+    selbst_aufrufende_func = ["euler_function","n_euler_function","tang_func"]
+
+    scipy_ver_erlaubt = ziel_func_name in selbst_aufrufende_func
+    normale_ver_erlaubt = True
+
     if overwrite_start is not None:
         start = overwrite_start
     einschritt_verfahren =  []
@@ -108,12 +117,11 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
     x_array = np.linspace(0,goal,iter+1,endpoint=True)
     ziel_func = n_ziel_func(x)
     ziel_func_arr = n_ziel_func(x_array)
-    ziel_func_name =  str(n_ziel_func)
-    ziel_func_name =  ziel_func_name[10:ziel_func_name.find("at 0")]
     y_ticks = np.linspace(start-1,n_ziel_func(goal),5)
     fig = plt.figure(figsize=(16,10))
     fig.suptitle(ziel_func_name)
-    c_zoom = [0,goal,n_ziel_func(goal)*-0.1,n_ziel_func(goal)]
+    c_zoom = [0,goal,min(ziel_func)-1,max(ziel_func)+1]
+
     if normale_ver_erlaubt:
 
         for verfahren in einschritt_verfahren:
@@ -165,7 +173,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
 
         fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
         diff_list = []
-        isode_res_list = odeint(Gdl,start,x_array)
+        isode_res_list = odeint(reversed_args(Gdl),start,x_array)
         
         plot_ziel_func(x,ziel_func)
         plt.plot(x_array,isode_res_list,"--",label="lsoda",c="r") #"lsoda Räuber"
@@ -177,28 +185,28 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
         plot_details("lsoda",y_ticks,c_zoom)
         index+=1
     
-    #if scipy_ver_erlaubt:
-    #    for verfahren in scipy_verfahren:
-    #        verfahren_name = str(verfahren)
-    #        verfahren_name = verfahren_name[29:verfahren_name.find("at 0")]
-    #        fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-    #        diff_list = []
-    #        plot_ziel_func(x,ziel_func)
-    #        start_arr = [start]
-    #        start_arr.append(esv.Euler_verfahren(step,x_array[0],start,Gdl))
-    #        scipy_res = verfahren(reversed_args(Gdl),0,start_arr,goal,max_step=step)
-    #        for i in range(len(x_array)-1):
-    #            scipy_res.step()
-    #        scipy_res_list = scipy_res.dense_output().__call__(x_array)[0]
-    #        #plt.plot(x_array,BDF_res_list,label=verfahren_name)
-    #        scipy_res_list2 = scipy_res.dense_output().__call__(x_array)[1]
-    #        #plt.plot(x_array,BDF_res_list2,label=verfahren_name)
-    #        plt.fill_between(x_array,scipy_res_list,scipy_res_list2,color="r",alpha=0.5,label=verfahren_name)
-    #        #for i,value in enumerate(scipy_res_list):
-    #        #    diff_list.append(n_ziel_func(x_array[i])-value)
-    #        #alle_verfahren[verfahren_name] = diff_list
-    #        plot_details(verfahren_name,y_ticks,c_zoom)
-    #        index+=1
+    if scipy_ver_erlaubt:
+        for verfahren in scipy_verfahren:
+            verfahren_name = str(verfahren)
+            verfahren_name = verfahren_name[29:verfahren_name.find("at 0")]
+            fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+            diff_list = []
+            plot_ziel_func(x,ziel_func)
+            start_arr = [start]
+            start_arr.append(esv.Euler_verfahren(step,x_array[0],start,Gdl))
+            scipy_res = verfahren(fun=Gdl,t0=0,y0=start_arr,t_bound=goal,max_step=step)
+            for i in range(len(x_array)-1):
+                scipy_res.step()
+            scipy_res_list = scipy_res.dense_output().__call__(x_array)[0]
+            #plt.plot(x_array,BDF_res_list,label=verfahren_name)
+            scipy_res_list2 = scipy_res.dense_output().__call__(x_array)[1]
+            #plt.plot(x_array,BDF_res_list2,label=verfahren_name)
+            plt.fill_between(x_array,scipy_res_list,scipy_res_list2,color="r",alpha=0.5,label=verfahren_name)
+            #for i,value in enumerate(scipy_res_list):
+            #    diff_list.append(n_ziel_func(x_array[i])-value)
+            #alle_verfahren[verfahren_name] = diff_list
+            plot_details(verfahren_name,y_ticks,c_zoom)
+            index+=1
     
 
     fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
@@ -208,8 +216,11 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None):
     #plt.subplots_adjust(hspace=1)
     plt.legend()
     plot_details("Differenzen zur Zielfunktion")
-    plt.savefig(f"output_{ziel_func_name[:-1]}.png", bbox_inches="tight")
     # plt.tight_layout()
+    if overwrite_start is not None:
+        plt.savefig(f"output_{ziel_func_name}_mit_fehler.png", bbox_inches="tight")
+    else:
+        plt.savefig(f"output_{ziel_func_name}.png", bbox_inches="tight")
     plt.show()
     return x_array,alle_verfahren
 
@@ -243,7 +254,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
     iter = int(goal/step) # Number of iterations
     x = np.linspace(0,goal,200)
     x_array = np.linspace(0,goal,iter+1,endpoint=True)
-    ziel_func = odeint(abl,start,x_array)
+    ziel_func = odeint(Lsoda_Lotka_temp,start,x_array)
     ziel_func = ziel_func.T
     ziel_func_arr = ziel_func[0]
     ziel_func_name =  str(n_ziel_func)
@@ -291,7 +302,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
             plt.plot(x_array,np.array(msv_res_list).T[1],"--",label=verfahren_name+" Beute" ,c="g")               
             plot_details(verfahren_name,y_ticks)
             index+=1
-    plt.savefig(f"output_{ziel_func_name[:-1]}.png", bbox_inches="tight")
+    plt.savefig(f"output_{ziel_func_name}.png", bbox_inches="tight")
     plt.show()
 
     """
@@ -312,7 +323,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
 
 
 if __name__ == "__main__":
-    x_array,euler_with_errors = normal(euler_function, euler_f_ableitung, 0.125, 2, 5, 1.01)
+    x_array,euler_with_errors = normal(euler_function, euler_f_ableitung, 0.125, 2, 5, 0.8)
     _,euler_without_errors = normal(euler_function, euler_f_ableitung, 0.125, 2, 5)
     for i,key in enumerate(euler_with_errors.keys()):
         diff_list = []
@@ -321,10 +332,11 @@ if __name__ == "__main__":
         plt.plot(x_array,diff_list,label = key)
     plt.legend()
     plot_details("Differenzen zur Zielfunktion")
+    plt.savefig("output_differenzen_bei_fehler")
     plt.show()
     normal(n_euler_function,n_euler_f_ableitung    ,0.125,2,  5)
     normal(tang_func,tang_func_ableitung     ,0.125,1.5,5)
     normal(log_function,log_ableitung,0.125,15, 5)
     normal(sin_func,cos_func,0.125,15, 5)
     normal(banalt,banal_abl,0.125,15, 5)
-    #lotka_vol(p_func=None,p_abl=Lotka_temp,p_start=[4,2],p_step=0.125,p_goal = 20)
+    lotka_vol(p_func=None,p_abl=Lotka_temp,p_start=[4,2],p_step=0.125,p_goal = 20)
