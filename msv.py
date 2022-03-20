@@ -54,5 +54,6 @@ def generate_starting_values(curr_list,iter,step,func):
 
 
 def mittelpunkt_verfahren(step,values,func,number_of_iterations,var):
+    # print(values[1] , 2 , step,func(values[0]))
     return values[1] + 2 * step*func(values[0])
 

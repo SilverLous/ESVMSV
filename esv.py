@@ -15,7 +15,7 @@ def Heun_verfahren(step,val,func):
     return 1/2 * val + 1/2 * (temp + step * func(tem))
 
 def verbessertes_Euler_verfahren(step,val,func):
-    temp = val + step/2 * func(val)
+    temp = val + step/2 * func(val) # 1/2 * ( func(x,val) + func(x + step, val + step * func(x,val)) )
     return val + step * func(temp)
 
 def mittelpunkt_verfahren(step,values,func,number_of_iterations,var):
