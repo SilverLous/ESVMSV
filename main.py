@@ -231,9 +231,9 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_pl
     plot_details("Differenzen zur Zielfunktion")
     # plt.tight_layout()
     if overwrite_start is not None:
-        plt.savefig(f"output_{ziel_func_name}_mit_fehler.png", bbox_inches="tight")
+        plt.savefig(f"ESVMSV/output_{ziel_func_name}_mit_fehler.png", bbox_inches="tight")
     else:
-        plt.savefig(f"output_{ziel_func_name}.png", bbox_inches="tight")
+        plt.savefig(f"ESVMSV/output_{ziel_func_name}.png", bbox_inches="tight")
     if to_plot:
         plt.show()
     return x_array,alle_verfahren,pd.DataFrame.from_dict(werte_dict)
@@ -318,7 +318,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
             plt.plot(x_array,np.array(msv_res_list).T[1],"--",label=verfahren_name+" Beute" ,c="g")               
             plot_details(verfahren_name,y_ticks)
             index+=1
-    plt.savefig(f"output_{ziel_func_name}.png", bbox_inches="tight")
+    plt.savefig(f"ESVMSV/output_{ziel_func_name}.png", bbox_inches="tight")
     plt.show()
 
     """
@@ -349,7 +349,7 @@ if __name__ == "__main__":
     #    plt.plot(x_array,diff_list,label = key)
     #plt.legend()
     #plot_details("Differenzen zur Zielfunktion")
-    #plt.savefig("output_differenzen_bei_fehler")
+    #plt.savefig("ESVMSV/output_differenzen_bei_fehler")
     #plt.show()
     #data_frame_list.append(normal(n_euler_function,n_euler_f_ableitung    ,0.125,2,  5)[2])
     #data_frame_list.append(normal(tang_func,tang_func_ableitung     ,0.125,1.5,5)[2])
@@ -383,6 +383,6 @@ if __name__ == "__main__":
     plt.yticks(range(num),y_ticks,fontsize = 7)
     plt.legend()
     plt.show()
-    df.to_csv("output_data.csv",index=False)
+    df.to_csv("ESVMSV/output_data.csv",index=False)
     #print(df)
     #lotka_vol(p_func=None,p_abl=Lotka_temp,p_start=[4,2],p_step=0.125,p_goal = 20)
