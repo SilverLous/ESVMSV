@@ -1,12 +1,12 @@
 def Euler_verfahren(step,x,val,func,anzahl_aufrufe=0):
     return val + step * func(x,val),anzahl_aufrufe+1
 
-def generelle_einschritt_verfahren(start_value, x_values, number_of_iterations, step, func, verfahren):
+def generelle_einschritt_verfahren(start_value, x_values, number_of_iterations, step, func, verfahren,steile_abl = 1):
     anzahl_aufrufe = 0
     res_list = [start_value]
     for i in range(number_of_iterations):
         result,anzahl_aufrufe = verfahren(step,x_values[i],res_list[i],func,anzahl_aufrufe)
-        res_list.append(result)
+        res_list.append(result*steile_abl)
     return res_list,anzahl_aufrufe
 
 def Heun_verfahren(step,x,val,func,anzahl_aufrufe=0):

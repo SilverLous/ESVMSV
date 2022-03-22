@@ -55,6 +55,9 @@ def tang_func(x,val=None):
 def tang_func_ableitung(x, val, t=None):
     return 1 + pow(val,2)
 
+def steile_ableitung(x, val, t=None,Gdl = None):
+    return Gdl(x*1.1,val*1.1,t)
+
 def Lotka_Volterra_derivative(X, alpha, beta, delta, gamma):
     x, y = X[0],X[1]
     dotx = x * (alpha - beta * y)   # growth - predation
@@ -83,7 +86,7 @@ def plot_ziel_func(x_arr,zielfunc,custom_color="lightskyblue"):
     
 ALL_FUNCTIONS = [(n_euler_function,n_euler_f_ableitung),(tang_func,tang_func_ableitung),(log_function,log_ableitung),(sin_func,cos_func),(banalt,banal_abl,)]
 
-def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_plot=True):
+def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_plot=True,steil_abl=1):
     cm = plt.get_cmap('gist_rainbow')
     alle_verfahren = {}
     n_ziel_func = p_ziel_func
@@ -119,8 +122,9 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_pl
     ziel_func = n_ziel_func(x)
     ziel_func_arr = n_ziel_func(x_array)
     y_ticks = np.linspace(start-1,n_ziel_func(goal),5)
-    fig = plt.figure(figsize=(16,10))
-    fig.suptitle(ziel_func_name)
+    if to_plot:
+        fig = plt.figure(figsize=(16,10))
+        fig.suptitle(ziel_func_name)
     c_zoom = [0,goal,min(ziel_func)-1,max(ziel_func)+1]
 
     werte_dict = {"name": [ziel_func_name], "steps":[iter]}
@@ -130,17 +134,22 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_pl
         for verfahren in einschritt_verfahren:
             verfahren_name = str(verfahren)
             verfahren_name = verfahren_name[10:verfahren_name.find("at 0")-1]
-            fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-            esv_res_list,aufrufe = esv.generelle_einschritt_verfahren(start, x_array, iter, step, Gdl, verfahren)
+            if to_plot:
+                fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+            esv_res_list,aufrufe = esv.generelle_einschritt_verfahren(start, x_array, iter, step, Gdl, verfahren, steil_abl)
             werte_dict[verfahren_name] = [aufrufe]
-            plot_ziel_func(x,ziel_func)
-            plt.plot(x_array,esv_res_list,"--",label=verfahren_name,c="r")
+            
+            if to_plot:
+                plot_ziel_func(x,ziel_func)
+            if to_plot:
+                plt.plot(x_array,esv_res_list,"--",label=verfahren_name,c="r")
             diff_list = []
             for i,value in enumerate(esv_res_list):
                 diff_list.append(ziel_func_arr[i]-value)
-            line = plt.plot(x_array,diff_list,label="Differenz")
-            line[0].set_color(cm(index/3*3/num_diff_colors))
-            plot_details(verfahren_name,y_ticks,c_zoom)
+            if to_plot:
+                line = plt.plot(x_array,diff_list,label="Differenz")
+                line[0].set_color(cm(index/3*3/num_diff_colors))
+                plot_details(verfahren_name,y_ticks,c_zoom)
             alle_verfahren[verfahren_name] = diff_list
             index+=1
 
@@ -151,58 +160,74 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_pl
             if verfahren_name=="Adams_Bashforth_Verfahren":
                 for stufen in range(2,6):
                     verfahren_name = f"{stufen} Schritt AB Verfahren"
-                    fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-                    msv_res_list,aufrufe = msv.generelle_mehrschritt_verfahren(start, x_array, iter, step, Gdl, verfahren, stufen)
+                    if to_plot:
+                        fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+                    msv_res_list,aufrufe = msv.generelle_mehrschritt_verfahren(start, x_array, iter, step, Gdl, verfahren, stufen, steil_abl)
                     #print(f"Das {verfahren_name} hat {aufrufe} Funktionsaufrufe über {iter} Schritten also eine Rate von {aufrufe/iter} Aufrufen pro Schritt")
                     werte_dict[verfahren_name] = [aufrufe]
-                    plot_ziel_func(x,ziel_func)
-                    plt.plot(x_array,msv_res_list,"--",label=verfahren_name,c="r")
+                    if to_plot:
+                        plot_ziel_func(x,ziel_func)
+                        plt.plot(x_array,msv_res_list,"--",label=verfahren_name,c="r")
                     diff_list = []
                     for i,value in enumerate(msv_res_list):
                         diff_list.append(ziel_func_arr[i]-value)
-                    line = plt.plot(x_array,diff_list,label="Differenz")
-                    line[0].set_color(cm(index/3*3/num_diff_colors))
-                    plot_details(verfahren_name,y_ticks,c_zoom)
+                        
+                    if to_plot:
+                        line = plt.plot(x_array,diff_list,label="Differenz")
+                        line[0].set_color(cm(index/3*3/num_diff_colors))
+                        plot_details(verfahren_name,y_ticks,c_zoom)
                     index+=1
                     alle_verfahren[verfahren_name] = diff_list
             else:
-                fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
-                msv_res_list,aufrufe = msv.generelle_mehrschritt_verfahren(start, x_array, iter, step, Gdl, verfahren, 2)
+                
+                if to_plot:
+                    fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+                msv_res_list,aufrufe = msv.generelle_mehrschritt_verfahren(start, x_array, iter, step, Gdl, verfahren, 2, steil_abl)
                 
                 #print(f"Das {verfahren_name} hat {aufrufe} Funktionsaufrufe über {iter} Schritten also eine Rate von {aufrufe/iter} Aufrufen pro Schritt")
                 werte_dict[verfahren_name] = [aufrufe]
-                plot_ziel_func(x,ziel_func)
-                plt.plot(x_array,msv_res_list,"--",label=verfahren_name,c="r")
+                
+                if to_plot:
+                    plot_ziel_func(x,ziel_func)
+                    plt.plot(x_array,msv_res_list,"--",label=verfahren_name,c="r")
                 diff_list = []
                 for i,value in enumerate(msv_res_list):
                     diff_list.append(ziel_func_arr[i]-value)
-                line = plt.plot(x_array,diff_list,label="Differenz")
-                line[0].set_color(cm(index/3*3/num_diff_colors))
-                plot_details(verfahren_name,y_ticks,c_zoom)
+                    
+                if to_plot:
+                    line = plt.plot(x_array,diff_list,label="Differenz")
+                    line[0].set_color(cm(index/3*3/num_diff_colors))
+                    plot_details(verfahren_name,y_ticks,c_zoom)
                 index+=1
                 alle_verfahren[verfahren_name] = diff_list
 
-        fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+        if to_plot:
+            fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
         diff_list = []
         isode_res_list = odeint(reversed_args(Gdl),start,x_array)
         
-        plot_ziel_func(x,ziel_func)
-        plt.plot(x_array,isode_res_list,"--",label="lsoda",c="r") #"lsoda Räuber"
+        if to_plot:
+            plot_ziel_func(x,ziel_func)
+            plt.plot(x_array,isode_res_list,"--",label="lsoda",c="r") #"lsoda Räuber"
         for i,value in enumerate(isode_res_list):
             diff_list.append(ziel_func_arr[i]-value[0])
         alle_verfahren["lsoda"] = diff_list
-        line = plt.plot(x_array,diff_list,label="Differenz")
-        line[0].set_color(cm(index/3*3/num_diff_colors))
-        plot_details("lsoda",y_ticks,c_zoom)
+        
+        if to_plot:
+            line = plt.plot(x_array,diff_list,label="Differenz")
+            line[0].set_color(cm(index/3*3/num_diff_colors))
+            plot_details("lsoda",y_ticks,c_zoom)
         index+=1
     
     if scipy_ver_erlaubt:
         for verfahren in scipy_verfahren:
             verfahren_name = str(verfahren)
             verfahren_name = verfahren_name[29:verfahren_name.find("at 0")]
-            fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+            
+            if to_plot:
+                fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+                plot_ziel_func(x,ziel_func)
             diff_list = []
-            plot_ziel_func(x,ziel_func)
             start_arr = [start]
             res,_ = esv.Euler_verfahren(step,x_array[0],start,Gdl)
             start_arr.append(res)
@@ -213,22 +238,28 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_pl
             #plt.plot(x_array,BDF_res_list,label=verfahren_name)
             scipy_res_list2 = scipy_res.dense_output().__call__(x_array)[1]
             #plt.plot(x_array,BDF_res_list2,label=verfahren_name)
-            plt.fill_between(x_array,scipy_res_list,scipy_res_list2,color="r",alpha=0.5,label=verfahren_name)
+            if to_plot:
+                plt.fill_between(x_array,scipy_res_list,scipy_res_list2,color="r",alpha=0.5,label=verfahren_name)
             #for i,value in enumerate(scipy_res_list):
             #    diff_list.append(n_ziel_func(x_array[i])-value)
             #alle_verfahren[verfahren_name] = diff_list
-            plot_details(verfahren_name,y_ticks,c_zoom)
+                plot_details(verfahren_name,y_ticks,c_zoom)
             index+=1
     
 
-    fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
+    if to_plot:
+        fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
     for i,key in enumerate(alle_verfahren.keys()):
-        line = plt.plot(x_array,alle_verfahren[key],label = i)
-        line[0].set_color(cm((i+1)/3*3/num_diff_colors))
+        
+        if to_plot:
+            line = plt.plot(x_array,alle_verfahren[key],label = i)
+            line[0].set_color(cm((i+1)/3*3/num_diff_colors))
         werte_dict[key+" median Fehler"] = median(alle_verfahren[key])
     #plt.subplots_adjust(hspace=1)
-    plt.legend()
-    plot_details("Differenzen zur Zielfunktion")
+    
+    if to_plot:
+        plt.legend()
+        plot_details("Differenzen zur Zielfunktion")
     # plt.tight_layout()
     if overwrite_start is not None:
         plt.savefig(f"ESVMSV/output_{ziel_func_name}_mit_fehler.png", bbox_inches="tight")
@@ -365,19 +396,19 @@ if __name__ == "__main__":
     for index,functions in enumerate(ALL_FUNCTIONS):
         #fig.add_subplot(fig_l, fig_l, index)
         data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=False)[2])
-        data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=False,overwrite_start=functions[0](0)-0.5)[2])
+        data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=False,steil_abl=1.1)[2])
+        #data_frame_list.append(normal(functions[0],steile_ableitung(functions[1]),0.125,1.5,5,to_plot=False))
         data_frame_list[-1]["name"] = data_frame_list[-1]["name"]+" mit eingebautem Fehler"
 
     df = pd.concat(data_frame_list)
 
     groups = df.groupby("name")
-    plt.show()
     y_ticks = []
     num = 0
     for index,group in enumerate(groups):
 
         serie = group[1].iloc[0][2+(len(ALL_FUNCTIONS)-1)*2:]
-        plt.barh(range(num,num+len(serie.values)),serie.values,label = group[0])
+        plt.barh(range(num,num+len(serie.values)),abs(serie.values),label = group[0])
         y_ticks.extend(serie.index)
         num+=len(serie.values)
     plt.yticks(range(num),y_ticks,fontsize = 7)

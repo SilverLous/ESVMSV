@@ -13,7 +13,7 @@ k_Adams_Bashforth = {
 def zwei_schritt_Adams_Bashforth_verfahren(step,x_values,values,func,number_of_iterations,var,anzahl_aufrufe=0):
     return values[0] + 3/2 * step * func(values[0]) - 1/2 * step * func(values[1])
 
-def generelle_mehrschritt_verfahren(start_value,x_values,number_of_iterations,step,func,verfahren,var):
+def generelle_mehrschritt_verfahren(start_value,x_values,number_of_iterations,step,func,verfahren,var, steil_abl):
     anzahl_aufrufe=0
     start_value = [start_value]
     #res_list = [start_value,esv.Euler_verfahren(step,start_value,func)]
@@ -31,6 +31,7 @@ def generelle_mehrschritt_verfahren(start_value,x_values,number_of_iterations,st
             x_array.append(x_values[i+j])
         #print(parameter_array)
         res,anzahl_aufrufe = verfahren(step,x_array,parameter_array,func,number_of_iterations,var,anzahl_aufrufe)
+        res*= steil_abl
         res_list.append(res)
         #print(res_list)
     return res_list,anzahl_aufrufe
