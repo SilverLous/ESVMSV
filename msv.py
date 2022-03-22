@@ -39,7 +39,7 @@ def generelle_mehrschritt_verfahren(start_value,x_values,number_of_iterations,st
 #      if len(values)>1:
 #          return 4/3 * values[0] - 1/3 * values[1] + 2/3*step*func(values[1])
 
-def generell_Adams_Bashforth_Verfahren(step,x_values,values,func,number_of_iterations,var,anzahl_aufrufe=0):
+def Adams_Bashforth_Verfahren(step,x_values,values,func,number_of_iterations,var,anzahl_aufrufe=0):
     iter = str(var)
     koeffizienten = k_Adams_Bashforth[iter]
     res = 0

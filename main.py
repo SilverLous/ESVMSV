@@ -106,7 +106,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_pl
     scipy_verfahren = []
     if normale_ver_erlaubt:
         einschritt_verfahren = [esv.Euler_verfahren,esv.verbessertes_Euler_verfahren,esv.Heun_verfahren]
-        mehrschritt_verfahren = [msv.generell_Adams_Bashforth_Verfahren,msv.mittelpunkt_verfahren]
+        mehrschritt_verfahren = [msv.Adams_Bashforth_Verfahren,msv.mittelpunkt_verfahren]
     num_diff_colors = len(einschritt_verfahren)+len(mehrschritt_verfahren)+len(scipy_verfahren)+5
     if scipy_ver_erlaubt:
         scipy_verfahren = [inte.Radau,inte.RK23,inte.RK45,inte.DOP853,inte.BDF,inte.LSODA]
@@ -132,7 +132,6 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_pl
             verfahren_name = verfahren_name[10:verfahren_name.find("at 0")-1]
             fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
             esv_res_list,aufrufe = esv.generelle_einschritt_verfahren(start, x_array, iter, step, Gdl, verfahren)
-            #print(f"Das {verfahren_name} hat {aufrufe} Funktionsaufrufe über {iter} Schritten also eine Rate von {aufrufe/iter} Aufrufen pro Schritt")
             werte_dict[verfahren_name] = [aufrufe]
             plot_ziel_func(x,ziel_func)
             plt.plot(x_array,esv_res_list,"--",label=verfahren_name,c="r")
@@ -149,7 +148,7 @@ def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_pl
         for verfahren in mehrschritt_verfahren:
             verfahren_name = str(verfahren)
             verfahren_name = verfahren_name[10:verfahren_name.find("at 0")-1]
-            if verfahren_name=="generell_Adams_Bashforth_Verfahren":
+            if verfahren_name=="Adams_Bashforth_Verfahren":
                 for stufen in range(2,6):
                     verfahren_name = f"{stufen} Schritt AB Verfahren"
                     fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
@@ -261,7 +260,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
     einschritt_verfahren =  []
     mehrschritt_verfahren = []
     einschritt_verfahren = [esv.Euler_verfahren,esv.verbessertes_Euler_verfahren,esv.Heun_verfahren]
-    mehrschritt_verfahren = [msv.generell_Adams_Bashforth_Verfahren,msv.mittelpunkt_verfahren]
+    mehrschritt_verfahren = [msv.Adams_Bashforth_Verfahren,msv.mittelpunkt_verfahren]
     num_diff_colors = len(einschritt_verfahren)+len(mehrschritt_verfahren)+3
     num_verfahren = len(einschritt_verfahren)+len(mehrschritt_verfahren)+3
     sqrt_of_l = round((num_verfahren) ** 0.5 + 0.5)
@@ -297,7 +296,7 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
     for verfahren in mehrschritt_verfahren:
         verfahren_name = str(verfahren)
         verfahren_name = verfahren_name[10:verfahren_name.find("at 0")-1]
-        if verfahren_name=="generell_Adams_Bashforth_Verfahren":
+        if verfahren_name=="Adams_Bashforth_Verfahren":
             for stufen in range(2,6):
                 fig.add_subplot(sqrt_of_l, sqrt_of_l, index)
                 msv_res_list,aufrufe = msv.generelle_mehrschritt_verfahren(start,x_array, iter, step, Gdl, verfahren, stufen)
@@ -372,10 +371,18 @@ if __name__ == "__main__":
     df = pd.concat(data_frame_list)
 
     groups = df.groupby("name")
+    plt.show()
+    y_ticks = []
+    num = 0
+    for index,group in enumerate(groups):
 
-    #for group in groups:
-        #plt.barh(df.columns[2+(len(ALL_FUNCTIONS)-1)*2:],group[2+(len(ALL_FUNCTIONS)-1)*2:])
-    plt.plot()
+        serie = group[1].iloc[0][2+(len(ALL_FUNCTIONS)-1)*2:]
+        plt.barh(range(num,num+len(serie.values)),serie.values,label = group[0])
+        y_ticks.extend(serie.index)
+        num+=len(serie.values)
+    plt.yticks(range(num),y_ticks,fontsize = 7)
+    plt.legend()
+    plt.show()
     df.to_csv("output_data.csv",index=False)
     #print(df)
     #lotka_vol(p_func=None,p_abl=Lotka_temp,p_start=[4,2],p_step=0.125,p_goal = 20)
