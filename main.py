@@ -43,11 +43,17 @@ def sin_func(x,val=None):
 def cos_func(x,val=None,t=None):
     return cos(x)
 
-def banalt(x,val=None):
-    return x**2
+def banal(x,val=None):
+    return (x+1)**2
 
 def banal_abl(x,val,t=None):
-    return 2*x
+    return 2*x+2
+
+def banal2(x,val=None):
+    return (x+1)**2
+
+def banal_abl2(x,val,t=None):
+    return 2*(val)**0.5
 
 def tang_func(x,val=None):
     return tan(x)
@@ -84,7 +90,7 @@ def plot_details(title,y_ticks=None,zoom=None):
 def plot_ziel_func(x_arr,zielfunc,custom_color="lightskyblue"):
     plt.plot(x_arr,zielfunc,label="Zielfunktion",lw=3,c=custom_color)
     
-ALL_FUNCTIONS = [(n_euler_function,n_euler_f_ableitung),(tang_func,tang_func_ableitung),(log_function,log_ableitung),(sin_func,cos_func),(banalt,banal_abl,)]
+ALL_FUNCTIONS = [(n_euler_function,n_euler_f_ableitung),(tang_func,tang_func_ableitung),(log_function,log_ableitung),(sin_func,cos_func),(banal,banal_abl),(banal2,banal_abl2)]
 
 def normal(p_ziel_func,p_GDL,p_step,p_goal_number,var,overwrite_start=None,to_plot=True,steil_abl=1):
     cm = plt.get_cmap('gist_rainbow')
@@ -386,7 +392,8 @@ if __name__ == "__main__":
     #data_frame_list.append(normal(tang_func,tang_func_ableitung     ,0.125,1.5,5)[2])
     #data_frame_list.append(normal(log_function,log_ableitung,0.125,15, 5)[2])
     #data_frame_list.append(normal(sin_func,cos_func,0.125,15, 5)[2])
-    #data_frame_list.append(normal(banalt,banal_abl,0.125,15, 5)[2])
+    #normal(banal,banal_abl,0.125,15, 5)[2]
+    #normal(banal2,banal_abl2,0.125,15, 5)[2]
     #df = pd.concat(data_frame_list)
 
     data_frame_list = []
@@ -396,22 +403,20 @@ if __name__ == "__main__":
     for index,functions in enumerate(ALL_FUNCTIONS):
         #fig.add_subplot(fig_l, fig_l, index)
         data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=False)[2])
-        data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=False,steil_abl=1.1)[2])
+        data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=False,overwrite_start=functions[0](0)*0.9)[2])
         #data_frame_list.append(normal(functions[0],steile_ableitung(functions[1]),0.125,1.5,5,to_plot=False))
         data_frame_list[-1]["name"] = data_frame_list[-1]["name"]+" mit eingebautem Fehler"
-
     df = pd.concat(data_frame_list)
-
     groups = df.groupby("name")
     y_ticks = []
     num = 0
     for index,group in enumerate(groups):
 
-        serie = group[1].iloc[0][2+(len(ALL_FUNCTIONS)-1)*2:]
+        serie = group[1].iloc[0][(len(ALL_FUNCTIONS)-1)*2:]
         plt.barh(range(num,num+len(serie.values)),abs(serie.values),label = group[0])
         y_ticks.extend(serie.index)
         num+=len(serie.values)
-    plt.yticks(range(num),y_ticks,fontsize = 7)
+    plt.yticks(range(num),y_ticks,fontsize = 5)
     plt.legend()
     plt.show()
     df.to_csv("ESVMSV/output_data.csv",index=False)
