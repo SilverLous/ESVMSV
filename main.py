@@ -374,27 +374,30 @@ def lotka_vol(p_func,p_abl,p_start,p_step,p_goal):
 
 
 
+def differenz_genau():
+    x_array,euler_with_errors,start_df = normal(euler_function, euler_f_ableitung, 0.125, 2, 5, 0.8)
+    _,euler_without_errors,df = normal(euler_function, euler_f_ableitung, 0.125, 2, 5)
+    data_frame_list = [start_df,df]
+    for i,key in enumerate(euler_with_errors.keys()):
+        diff_list = []
+        for value1,value2 in zip(euler_with_errors[key],euler_without_errors[key]):
+            diff_list.append(value1-value2)
+        plt.plot(x_array,diff_list,label = key)
+    plt.legend()
+    plot_details("Differenzen zur Zielfunktion")
+    plt.savefig("ESVMSV/output_differenzen_bei_fehler")
+    plt.show()
 
-if __name__ == "__main__":
-    #x_array,euler_with_errors,start_df = normal(euler_function, euler_f_ableitung, 0.125, 2, 5, 0.8)
-    #_,euler_without_errors,df = normal(euler_function, euler_f_ableitung, 0.125, 2, 5)
-    #data_frame_list = [start_df,df]
-    #for i,key in enumerate(euler_with_errors.keys()):
-    #    diff_list = []
-    #    for value1,value2 in zip(euler_with_errors[key],euler_without_errors[key]):
-    #        diff_list.append(value1-value2)
-    #    plt.plot(x_array,diff_list,label = key)
-    #plt.legend()
-    #plot_details("Differenzen zur Zielfunktion")
-    #plt.savefig("ESVMSV/output_differenzen_bei_fehler")
-    #plt.show()
-    #data_frame_list.append(normal(n_euler_function,n_euler_f_ableitung    ,0.125,2,  5)[2])
-    #data_frame_list.append(normal(tang_func,tang_func_ableitung     ,0.125,1.5,5)[2])
-    #data_frame_list.append(normal(log_function,log_ableitung,0.125,15, 5)[2])
-    #data_frame_list.append(normal(sin_func,cos_func,0.125,15, 5)[2])
-    #normal(banal,banal_abl,0.125,15, 5)[2]
-    #normal(banal2,banal_abl2,0.125,15, 5)[2]
-    #df = pd.concat(data_frame_list)
+def alle_funcktionen_einzeln():
+    normal(euler_function, euler_f_ableitung, 0.125, 2, 5, 0.8)
+    normal(n_euler_function,n_euler_f_ableitung    ,0.125,2,  5)
+    normal(tang_func,tang_func_ableitung     ,0.125,1.5,5)
+    normal(log_function,log_ableitung,0.125,15, 5)
+    normal(sin_func,cos_func,0.125,15, 5)
+    normal(banal,banal_abl,0.125,15, 5)
+    normal(banal2,banal_abl2,0.125,15, 5)
+
+def alle_funktionen_diff(to_plot = False):
 
     data_frame_list = []
 
@@ -402,8 +405,8 @@ if __name__ == "__main__":
     #fig = plt.figure()
     for index,functions in enumerate(ALL_FUNCTIONS):
         #fig.add_subplot(fig_l, fig_l, index)
-        data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=False)[2])
-        data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=False,overwrite_start=functions[0](0)*0.9)[2])
+        data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=to_plot)[2])
+        data_frame_list.append(normal(functions[0],functions[1],0.125,1.5,5,to_plot=to_plot,overwrite_start=functions[0](0)*0.9)[2])
         #data_frame_list.append(normal(functions[0],steile_ableitung(functions[1]),0.125,1.5,5,to_plot=False))
         data_frame_list[-1]["name"] = data_frame_list[-1]["name"]+" mit eingebautem Fehler"
     df = pd.concat(data_frame_list)
@@ -420,5 +423,12 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
     df.to_csv("ESVMSV/output_data.csv",index=False)
+
+
+
+if __name__ == "__main__":
     #print(df)
+    alle_funcktionen_einzeln()
+    #differenz_genau()
+    #alle_funktionen_diff(True)
     #lotka_vol(p_func=None,p_abl=Lotka_temp,p_start=[4,2],p_step=0.125,p_goal = 20)
